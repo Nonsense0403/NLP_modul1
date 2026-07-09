@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NLP Knowledge Artifact Repository — Week 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2333;
+    --paper:#F5F6F2;
+    --panel:#FFFFFF;
+    --teal:#2E8B84;
+    --teal-dim:#E4F1F0;
+    --amber:#E8A33D;
+    --amber-dim:#FBF0DD;
+    --slate:#697180;
+    --line:#E1E3DC;
+    --coral:#D5654F;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif; margin:0; letter-spacing:-0.01em;}
+  code,.mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;}
+  ::selection{background:var(--teal); color:#fff;}
+
+  /* ---- App shell ---- */
+  .app{display:grid; grid-template-columns:250px 1fr; min-height:100vh;}
+  .sidebar{
+    background:var(--ink); color:#EDEFF3; padding:22px 16px 24px;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+  }
+  .brand{padding:4px 8px 18px; border-bottom:1px solid rgba(255,255,255,0.12); margin-bottom:14px;}
+  .brand .tag{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--teal); letter-spacing:0.12em; text-transform:uppercase;}
+  .brand h1{font-size:19px; line-height:1.25; margin-top:6px;}
+  .brand .course{font-size:11.5px; color:#9BA3B5; margin-top:8px; line-height:1.5;}
+
+  nav.tabs{display:flex; flex-direction:column; gap:2px; margin-top:6px;}
+  nav.tabs button{
+    all:unset; cursor:pointer; padding:10px 10px; border-radius:8px;
+    font-size:13.5px; display:flex; align-items:center; gap:10px; color:#C7CCDA;
+    transition:background .15s, color .15s;
+  }
+  nav.tabs button .idx{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#6E7690; width:20px;}
+  nav.tabs button:hover{background:rgba(255,255,255,0.06); color:#fff;}
+  nav.tabs button.active{background:var(--teal); color:#04211F;}
+  nav.tabs button.active .idx{color:#04312D;}
+
+  .team-box{margin-top:20px; padding:12px 12px; background:rgba(255,255,255,0.05); border-radius:10px; border:1px solid rgba(255,255,255,0.1);}
+  .team-box .lbl{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em; color:var(--amber); text-transform:uppercase;}
+  .member{font-size:12.5px; margin-top:7px; color:#D6D9E2; display:flex; justify-content:space-between;}
+  .member b{color:#fff; font-weight:500;}
+  .member span{font-family:'IBM Plex Mono',monospace; color:#9BA3B5;}
+
+  main{padding:38px 46px 80px; max-width:980px;}
+  .panel{display:none; animation:fade .35s ease;}
+  .panel.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--teal); margin-bottom:8px; display:block;}
+  h2.section-title{font-size:29px; margin-bottom:6px;}
+  .section-sub{color:var(--slate); font-size:14.5px; max-width:640px; margin-bottom:26px; line-height:1.55;}
+
+  /* ---- Home / hero ---- */
+  .hero-top{border-bottom:1px solid var(--line); padding-bottom:28px; margin-bottom:28px;}
+  .hero-top h2{font-size:34px; line-height:1.15; max-width:640px;}
+  .hero-top p{color:var(--slate); font-size:15px; max-width:600px; line-height:1.6; margin-top:12px;}
+  .stat-row{display:flex; gap:10px; margin-top:22px; flex-wrap:wrap;}
+  .stat{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 16px; min-width:118px;}
+  .stat b{font-family:'Space Grotesk',sans-serif; font-size:22px; display:block;}
+  .stat span{font-size:11px; color:var(--slate);}
+
+  .demo-box{background:var(--ink); border-radius:16px; padding:26px 28px; margin-top:10px; color:#fff;}
+  .demo-box h3{font-size:16px; color:#fff;}
+  .demo-box .demo-desc{color:#9BA3B5; font-size:13px; margin-top:6px; max-width:560px; line-height:1.55;}
+  .demo-input{
+    width:100%; margin-top:16px; background:#111826; border:1px solid rgba(255,255,255,0.15);
+    color:#fff; font-family:'IBM Plex Mono',monospace; font-size:14px; padding:12px 14px; border-radius:8px;
+  }
+  .pipe-steps{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .pipe-steps button{
+    all:unset; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:7px 11px;
+    border-radius:20px; background:rgba(255,255,255,0.08); color:#C7CCDA; border:1px solid rgba(255,255,255,0.12);
+  }
+  .pipe-steps button.on{background:var(--teal); color:#04211F; border-color:var(--teal);}
+  .token-out{margin-top:18px; display:flex; flex-wrap:wrap; gap:8px; min-height:40px;}
+  .token-out .tok{
+    background:rgba(46,139,132,0.18); border:1px solid rgba(46,139,132,0.5); color:#8FE0D8;
+    font-family:'IBM Plex Mono',monospace; font-size:13px; padding:5px 10px; border-radius:6px;
+  }
+  .token-out .tok.removed{ text-decoration:line-through; opacity:0.35; border-color:rgba(213,101,79,0.5); color:#e79485; background:rgba(213,101,79,0.12);}
+
+  /* ---- concept cards ---- */
+  .topic-group{margin-bottom:8px;}
+  .topic-group h3{font-size:15px; margin:26px 0 12px; display:flex; align-items:center; gap:10px;}
+  .topic-group h3 .n{font-family:'IBM Plex Mono',monospace; font-size:11px; background:var(--amber-dim); color:#93641B; padding:2px 8px; border-radius:20px;}
+  .card-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:12px;}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 15px; cursor:pointer;
+    transition:box-shadow .15s, transform .15s;
+  }
+  .card:hover{box-shadow:0 4px 14px rgba(27,35,51,0.07); transform:translateY(-1px);}
+  .card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .card h4{font-size:14.5px; font-weight:600;}
+  .who{font-family:'IBM Plex Mono',monospace; font-size:9.5px; padding:2px 6px; border-radius:5px; white-space:nowrap; height:fit-content;}
+  .who.c{background:var(--teal-dim); color:#1C6B65;}
+  .who.s{background:var(--amber-dim); color:#93641B;}
+  .card .def{font-size:12.5px; color:var(--slate); margin-top:6px; line-height:1.5;}
+  .card .more{display:none; margin-top:10px; border-top:1px dashed var(--line); padding-top:10px;}
+  .card.open .more{display:block;}
+  .card .more .row{font-size:12px; margin-bottom:7px; line-height:1.5;}
+  .card .more .row b{display:block; font-size:9.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--teal); margin-bottom:2px; font-family:'IBM Plex Mono',monospace;}
+  .card .more .row.ex{background:#F7F8F5; border:1px solid var(--line); padding:6px 8px; border-radius:6px; font-family:'IBM Plex Mono',monospace; font-size:11.5px;}
+  .card .toggle-hint{font-size:10.5px; color:#AAB0BC; margin-top:8px; font-family:'IBM Plex Mono',monospace;}
+
+  /* ---- comparison tables ---- */
+  .compare-wrap{margin-bottom:34px;}
+  .compare-wrap h3{font-size:16px; margin-bottom:2px;}
+  .compare-wrap .owner{font-size:11px; color:var(--slate); margin-bottom:10px; display:block;}
+  table.compare{width:100%; border-collapse:collapse; background:var(--panel); border-radius:10px; overflow:hidden; border:1px solid var(--line);}
+  table.compare th, table.compare td{text-align:left; padding:10px 13px; font-size:12.8px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.5;}
+  table.compare th{background:#EFF3F1; font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; color:#3E4552;}
+  table.compare tr:last-child td{border-bottom:none;}
+  table.compare td:first-child{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--slate); width:130px;}
+
+  /* ---- workflow diagrams ---- */
+  .flow-card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px 24px; margin-bottom:26px;}
+  .flow-card h3{font-size:16px;}
+  .flow-card .owner{font-size:11px; color:var(--slate); margin-top:2px; display:block; margin-bottom:14px;}
+  .flow{display:flex; align-items:center; flex-wrap:wrap; gap:0;}
+  .fbox{
+    background:var(--teal-dim); border:1.5px solid var(--teal); color:#1C6B65; font-family:'IBM Plex Mono',monospace;
+    font-size:12px; padding:10px 13px; border-radius:9px; text-align:center; min-width:110px;
+  }
+  .fbox.start{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .fbox.end{background:var(--amber-dim); border-color:var(--amber); color:#93641B;}
+  .arrow{color:var(--slate); font-size:18px; padding:0 8px; flex-shrink:0;}
+  @media(max-width:720px){ .arrow{transform:rotate(90deg);} }
+
+  /* ---- applications ---- */
+  .app-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px;}
+  .app-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px;}
+  .app-card h4{font-size:15px; display:flex; align-items:center; gap:8px;}
+  .app-card .row{font-size:12.5px; margin-top:9px; line-height:1.55;}
+  .app-card .row b{font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; color:var(--teal); display:block; margin-bottom:2px;}
+
+  /* ---- research ---- */
+  .research-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;}
+  @media(max-width:720px){.research-grid{grid-template-columns:1fr;}}
+  .r-card{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--teal); border-radius:10px; padding:15px 17px;}
+  .r-card.industry{border-left-color:var(--amber);}
+  .r-card.tool{border-left-color:var(--coral);}
+  .r-card .kicker{font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; color:var(--slate);}
+  .r-card h4{font-size:14.5px; margin-top:4px;}
+  .r-card p{font-size:12.5px; color:var(--slate); margin-top:6px; line-height:1.55;}
+
+  /* ---- sustainability ---- */
+  .sustain-box{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:24px 26px;}
+  .sustain-box p{font-size:13.8px; line-height:1.75; color:#333A48; margin-bottom:14px;}
+  .pill-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;}
+  .pill{background:var(--teal-dim); color:#1C6B65; font-size:11.5px; padding:5px 12px; border-radius:20px; font-family:'IBM Plex Mono',monospace;}
+  .wc{font-size:11px; color:var(--slate); margin-top:14px; font-family:'IBM Plex Mono',monospace;}
+
+  /* ---- contribution / reflection ---- */
+  table.contrib{width:100%; border-collapse:collapse; background:var(--panel); border-radius:10px; overflow:hidden; border:1px solid var(--line); margin-bottom:30px;}
+  table.contrib th, table.contrib td{padding:10px 14px; font-size:12.8px; border-bottom:1px solid var(--line); text-align:left;}
+  table.contrib th{background:#EFF3F1; font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; color:#3E4552;}
+  table.contrib td.check{color:var(--teal); font-weight:600; text-align:center;}
+  .reflect-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:26px;}
+  @media(max-width:720px){.reflect-grid{grid-template-columns:1fr;}}
+  .reflect-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px 20px;}
+  .reflect-card .who-lbl{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+  .reflect-card h4{font-size:14.5px;}
+  .reflect-card .roll{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--slate);}
+  .reflect-card p{font-size:13px; line-height:1.65; color:#3A4150;}
+
+  .ai-note{
+    background:var(--amber-dim); border:1px solid #E9CE9C; border-radius:10px; padding:14px 16px; font-size:12.5px;
+    color:#6B4E17; line-height:1.6; margin-top:6px;
+  }
+  .ai-note b{font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em;}
+
+  footer.note{margin-top:36px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--slate); line-height:1.6;}
+
+  @media(max-width:860px){
+    .app{grid-template-columns:1fr;}
+    .sidebar{position:relative; height:auto;}
+    main{padding:26px 20px 60px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="tag">CCE-I · NLP · Sem V</span>
+      <h1>Knowledge Artifact Repository</h1>
+      <div class="course">Shah &amp; Anchor Kutchhi Engineering College<br>CMCOR1PE301.1 — Week 1 Curriculum</div>
+    </div>
+
+    <nav class="tabs">
+      <button data-tab="home" class="active"><span class="idx">00</span> Home</button>
+      <button data-tab="cards"><span class="idx">A</span> Concept Cards</button>
+      <button data-tab="compare"><span class="idx">B</span> Comparative Analysis</button>
+      <button data-tab="flow"><span class="idx">C</span> Workflow Diagrams</button>
+      <button data-tab="apps"><span class="idx">D</span> Real-World Applications</button>
+      <button data-tab="research"><span class="idx">E</span> Research &amp; Industry</button>
+      <button data-tab="sustain"><span class="idx">F</span> Sustainability</button>
+      <button data-tab="contrib"><span class="idx">G</span> Contribution &amp; Reflection</button>
+    </nav>
+
+    <div class="team-box">
+      <div class="lbl">Team of 2</div>
+      <div class="member"><b>Chinmay Satam</b><span>Roll 58</span></div>
+      <div class="member"><b>Suyog Satam</b><span>Roll 59</span></div>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- HOME -->
+    <section class="panel active" id="home">
+      <div class="hero-top">
+        <span class="eyebrow">NLP Knowledge Engineering Team</span>
+        <h2>Every technique that turns raw text into something a model can read.</h2>
+        <p>This repository documents Week 1 of Natural Language Processing — preprocessing, feature engineering, language representation, and language models — as a set of concept cards, comparisons, pipelines, and applications built for a beginner to actually understand, not just memorize.</p>
+        <div class="stat-row">
+          <div class="stat"><b>21</b><span>Concept cards</span></div>
+          <div class="stat"><b>3</b><span>Comparative tables</span></div>
+          <div class="stat"><b>3</b><span>Pipeline diagrams</span></div>
+          <div class="stat"><b>5</b><span>Real-world applications</span></div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <h3>Try the pipeline yourself</h3>
+        <div class="demo-desc">Type a sentence, then toggle preprocessing steps on and off to see exactly what each one does to the text — this is the same pipeline documented in Section C.</div>
+        <input id="demoInput" class="demo-input" value="The Cats are RUNNING quickly, aren't they??" />
+        <div class="pipe-steps">
+          <button class="step on" data-step="lower">lowercase</button>
+          <button class="step on" data-step="clean">remove punctuation</button>
+          <button class="step on" data-step="stop">remove stop-words</button>
+          <button class="step on" data-step="lemma">lemmatize</button>
+        </div>
+        <div class="token-out" id="tokenOut"></div>
+      </div>
+    </section>
+
+    <!-- SECTION A: CONCEPT CARDS -->
+    <section class="panel" id="cards">
+      <span class="eyebrow">Section A</span>
+      <h2 class="section-title">Concept Cards</h2>
+      <p class="section-sub">One card per concept — definition, purpose, mechanism, a worked example, and honest trade-offs. Tap a card to expand it. <span class="mono">C</span> = Chinmay (58), <span class="mono">S</span> = Suyog (59).</p>
+      <div id="cardMount"></div>
+    </section>
+
+    <!-- SECTION B: COMPARATIVE ANALYSIS -->
+    <section class="panel" id="compare">
+      <span class="eyebrow">Section B</span>
+      <h2 class="section-title">Comparative Analysis</h2>
+      <p class="section-sub">Three head-to-head comparisons across the techniques most often confused with one another.</p>
+      <div id="compareMount"></div>
+    </section>
+
+    <!-- SECTION C: WORKFLOW DIAGRAMS -->
+    <section class="panel" id="flow">
+      <span class="eyebrow">Section C</span>
+      <h2 class="section-title">Workflow Diagrams</h2>
+      <p class="section-sub">How raw text actually travels through a real NLP system, step by step.</p>
+      <div id="flowMount"></div>
+    </section>
+
+    <!-- SECTION D: APPLICATIONS -->
+    <section class="panel" id="apps">
+      <span class="eyebrow">Section D</span>
+      <h2 class="section-title">Real-World Applications</h2>
+      <p class="section-sub">Five systems people use daily, and which Week 1 concepts make them work.</p>
+      <div class="app-grid" id="appMount"></div>
+    </section>
+
+    <!-- SECTION E: RESEARCH & INDUSTRY -->
+    <section class="panel" id="research">
+      <span class="eyebrow">Section E</span>
+      <h2 class="section-title">Research &amp; Industry Insights</h2>
+      <p class="section-sub">Two recent research directions, two industrial applications, and one open-source framework the group explored.</p>
+      <div class="research-grid" id="researchMount"></div>
+    </section>
+
+    <!-- SECTION F: SUSTAINABILITY -->
+    <section class="panel" id="sustain">
+      <span class="eyebrow">Sustainability &amp; Societal Impact</span>
+      <h2 class="section-title">How NLP Can Contribute to Society and Sustainable Development</h2>
+      <div class="sustain-box">
+        <p>Language is the biggest barrier standing between people and the information, services, and opportunities that already exist. NLP shrinks that barrier. In a country like India, where over twenty languages are spoken by more than a million people each, most government forms, banking apps, and health advisories are still written in English or Hindi first. Techniques covered in this repository — tokenization, embeddings, and language models — are exactly what make it possible to translate a hospital discharge summary into Marathi or Konkani, or to let a farmer ask a chatbot a question in their own dialect and get an answer that makes sense. That is <b>language accessibility</b> and <b>regional language technology</b> working together, and it directly affects who gets to participate in a digital economy and who gets left out of it.</p>
+        <p>The same techniques support <b>educational inclusion</b>. Automatic summarization and simplification tools can take a dense textbook chapter and turn it into a shorter, easier version for a first-generation learner, without needing a human tutor available at every hour. <b>Assistive technologies</b> built on speech-to-text and text-to-speech pipelines give visually impaired or dyslexic students a way to consume the same material as everyone else, at their own pace. None of this needs a new invention — it needs the preprocessing and representation techniques in this repository applied thoughtfully to underserved languages and underserved learners, which are usually the last to receive investment.</p>
+        <p>At the level of governance, <b>citizen services</b> increasingly run through chatbots and automated grievance systems that rely on the same NLP stack: a citizen's complaint is tokenized, cleaned, classified, and routed to the right department in seconds instead of weeks. This reduces paperwork, cuts down the carbon and paper cost of manual processing, and makes public services measurably faster for people who cannot afford to take a day off work to visit an office. Taken together, the Week 1 techniques in this repository are not just an academic exercise — they are the ground floor of a more inclusive, more sustainable digital society, and understanding them is the first step toward building NLP responsibly rather than just building it.</p>
+        <div class="pill-row">
+          <span class="pill">Language Accessibility</span>
+          <span class="pill">Regional Language Tech</span>
+          <span class="pill">Educational Inclusion</span>
+          <span class="pill">Assistive Technologies</span>
+          <span class="pill">Citizen Services</span>
+        </div>
+        <div class="wc">~410 words</div>
+      </div>
+    </section>
+
+    <!-- SECTION G: CONTRIBUTION & REFLECTION -->
+    <section class="panel" id="contrib">
+      <span class="eyebrow">Individual Contribution</span>
+      <h2 class="section-title">Contribution Matrix &amp; Reflection</h2>
+      <p class="section-sub">Every deliverable required by the activity, mapped to whoever authored it.</p>
+
+      <table class="contrib">
+        <thead><tr><th>Deliverable</th><th>Chinmay Satam (58)</th><th>Suyog Satam (59)</th></tr></thead>
+        <tbody>
+          <tr><td>Concept Cards — Text Preprocessing (8)</td><td class="check">✓ Authored</td><td>—</td></tr>
+          <tr><td>Concept Cards — Language Models (3)</td><td class="check">✓ Authored</td><td>—</td></tr>
+          <tr><td>Concept Cards — Feature Engineering (5)</td><td>—</td><td class="check">✓ Authored</td></tr>
+          <tr><td>Concept Cards — Language Representation (5)</td><td>—</td><td class="check">✓ Authored</td></tr>
+          <tr><td>Comparative Analysis — Stemming vs Lemmatization</td><td class="check">✓ Authored</td><td>—</td></tr>
+          <tr><td>Comparative Analysis — Word2Vec vs FastText</td><td class="check">✓ Authored</td><td>—</td></tr>
+          <tr><td>Comparative Analysis — TF vs TF-IDF</td><td>—</td><td class="check">✓ Authored</td></tr>
+          <tr><td>Workflow Diagram — Text Preprocessing Pipeline</td><td class="check">✓ Authored</td><td>—</td></tr>
+          <tr><td>Workflow Diagram — Feature Engineering Pipeline</td><td>—</td><td class="check">✓ Authored</td></tr>
+          <tr><td>Workflow Diagram — Text-to-Vector Transformation</td><td>Reviewed</td><td class="check">✓ Authored</td></tr>
+          <tr><td>Real-World Applications (5)</td><td class="check">✓ Co-authored</td><td class="check">✓ Co-authored</td></tr>
+          <tr><td>Research &amp; Industry Insights</td><td class="check">✓ Co-authored</td><td class="check">✓ Co-authored</td></tr>
+          <tr><td>Sustainability &amp; Societal Impact</td><td>Drafted</td><td>Edited</td></tr>
+          <tr><td>Reflection Note</td><td class="check">✓ Own note</td><td class="check">✓ Own note</td></tr>
+          <tr><td>Repository Structuring &amp; Web Build</td><td class="check">✓</td><td class="check">✓</td></tr>
+        </tbody>
+      </table>
+
+      <div class="reflect-grid">
+        <div class="reflect-card">
+          <div class="who-lbl"><h4>Reflection — Chinmay Satam</h4><span class="roll">Roll 58</span></div>
+          <p>Before this activity I treated stemming and lemmatization as basically the same thing. Building the comparison table forced me to actually run both on the same word list, and seeing stemming spit out "studi" while lemmatization correctly gave "study" made the difference click in a way no textbook definition had. Drawing the preprocessing pipeline was harder than expected — I kept forgetting where noise removal should sit relative to tokenization, and had to redo the diagram twice. The biggest takeaway for me is that preprocessing order actually changes results, it isn't just a checklist. Next time I'd want to test this pipeline on a messy, real dataset instead of clean textbook sentences.</p>
+        </div>
+        <div class="reflect-card">
+          <div class="who-lbl"><h4>Reflection — Suyog Satam</h4><span class="roll">Roll 59</span></div>
+          <p>Working on TF-IDF and the embedding concepts showed me how much the field moved from just counting words to actually representing meaning. Writing the Word2Vec vs FastText comparison was the most useful part — I hadn't realized FastText's sub-word trick is exactly why it handles typos and rare words better, since I could reason through the mechanism instead of memorizing a bullet point. The hardest part was keeping every concept card short without losing accuracy; I had to rewrite a few definitions three or four times to compress them without them becoming vague. I'd like to eventually try training a small Word2Vec model myself to see these ideas in practice.</p>
+        </div>
+      </div>
+
+      <div class="ai-note">
+        <b>AI Assistance Declaration:</b> AI assistance was used in a limited, supporting role only — to help structure this repository into a navigable web page and format the concept cards, tables, and diagrams consistently. All concept explanations, comparisons, examples, application analysis, and reflections were written and verified by the group members. No content was copied from AI output verbatim into technical claims without review.
+      </div>
+
+      <footer class="note">
+        Knowledge Artifact Repository · Group of 2 (Chinmay Satam – 58, Suyog Satam – 59) · CMCOR1PE301.1, Natural Language Processing, Sem V, TY B.Tech, A.Y. 2026-27 · Shah &amp; Anchor Kutchhi Engineering College. This file is the offline PDF/HTML export of the repository; the live version is hosted on GitHub Pages as per the assignment's platform requirement.
+      </footer>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* ---------------- Tab navigation ---------------- */
+const tabs = document.querySelectorAll('nav.tabs button');
+const panels = document.querySelectorAll('.panel');
+tabs.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabs.forEach(b=>b.classList.remove('active'));
+    panels.forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+/* ---------------- Home pipeline demo ---------------- */
+const STOP = new Set(["the","is","are","a","an","to","of","and","in","it","on","for","that","this","aren't","they","do","does"]);
+const LEMMA = {"running":"run","cats":"cat","quickly":"quick","are":"be","studies":"study","played":"play","better":"good"};
+const demoInput = document.getElementById('demoInput');
+const tokenOut = document.getElementById('tokenOut');
+const stepBtns = document.querySelectorAll('.pipe-steps .step');
+
+function renderPipeline(){
+  const on = {};
+  stepBtns.forEach(b=>on[b.dataset.step] = b.classList.contains('on'));
+  let text = demoInput.value;
+  if(on.lower) text = text.toLowerCase();
+  let raw = text.split(/\s+/).filter(Boolean);
+  let cleaned = raw.map(w => on.clean ? w.replace(/[^a-zA-Z']/g,'') : w).filter(Boolean);
+  tokenOut.innerHTML = '';
+  cleaned.forEach(tok=>{
+    let display = tok;
+    let removed = false;
+    if(on.stop && STOP.has(tok.toLowerCase())) removed = true;
+    if(!removed && on.lemma && LEMMA[tok.toLowerCase()]) display = LEMMA[tok.toLowerCase()];
+    const span = document.createElement('span');
+    span.className = 'tok' + (removed ? ' removed':'');
+    span.textContent = display;
+    tokenOut.appendChild(span);
+  });
+}
+demoInput.addEventListener('input', renderPipeline);
+stepBtns.forEach(b=> b.addEventListener('click', ()=>{ b.classList.toggle('on'); renderPipeline(); }));
+renderPipeline();
+
+/* ---------------- Concept card data ---------------- */
+const CONCEPTS = [
+{ group:"Text Preprocessing", owner:"c", name:"Sentence Segmentation",
+  def:"Splitting a text block into individual sentences.",
+  purpose:"Lets a model process one grammatical unit at a time.",
+  how:"Detects boundary markers like '.', '!', '?' while handling abbreviations.",
+  ex:"\"Dr. Rao left. He returned.\" → [\"Dr. Rao left.\", \"He returned.\"]",
+  adv:"Preserves sentence-level context for tasks like summarization.",
+  lim:"Abbreviations and informal punctuation cause wrong splits.",
+  app:"Summarization, machine translation, text-to-speech." },
+{ group:"Text Preprocessing", owner:"c", name:"Tokenization",
+  def:"Breaking text into smaller units called tokens (words, sub-words, punctuation).",
+  purpose:"Converts unstructured text into discrete units a model can count and index.",
+  how:"Splits on whitespace/punctuation, or uses sub-word algorithms like BPE.",
+  ex:"\"NLP is fun!\" → [\"NLP\",\"is\",\"fun\",\"!\"]",
+  adv:"Foundation for almost every downstream NLP step.",
+  lim:"Ambiguous for languages without clear word boundaries, e.g. Chinese.",
+  app:"Search engines, chatbots, spell-checkers." },
+{ group:"Text Preprocessing", owner:"c", name:"Case Normalization",
+  def:"Converting all text to a single case, usually lowercase.",
+  purpose:"Prevents a model from treating \"The\" and \"the\" as different words.",
+  how:"A simple lowercase() transform applied to every token.",
+  ex:"\"Apple\" and \"apple\" → \"apple\"",
+  adv:"Reduces vocabulary size and sparsity.",
+  lim:"Loses meaning where case matters, e.g. Apple the company vs apple the fruit.",
+  app:"Search indexing, sentiment analysis." },
+{ group:"Text Preprocessing", owner:"c", name:"Stop-word Removal",
+  def:"Removing very common words that carry little topical meaning (is, the, and).",
+  purpose:"Focuses the model on content-bearing words.",
+  how:"Filters tokens against a pre-built stop-word list.",
+  ex:"\"This is the best day\" → [\"best\",\"day\"]",
+  adv:"Reduces feature space and speeds up processing.",
+  lim:"Can remove words that matter for meaning, e.g. negations like \"not\".",
+  app:"Topic modeling, keyword extraction, search." },
+{ group:"Text Preprocessing", owner:"c", name:"Stemming",
+  def:"Chopping word endings to reduce a word to a rough root form.",
+  purpose:"Groups related word forms under one representation.",
+  how:"Applies rule-based suffix-stripping, e.g. the Porter Stemmer.",
+  ex:"\"playing\", \"played\" → \"play\"",
+  adv:"Fast and simple to implement.",
+  lim:"Can produce non-real words, e.g. \"studies\" → \"studi\".",
+  app:"Search engines, information retrieval." },
+{ group:"Text Preprocessing", owner:"c", name:"Lemmatization",
+  def:"Reducing a word to its dictionary base form (lemma) using vocabulary and grammar.",
+  purpose:"Produces a linguistically correct root form, unlike stemming.",
+  how:"Uses POS tags and a lexicon such as WordNet to map words to lemmas.",
+  ex:"\"better\" → \"good\", \"running\" → \"run\"",
+  adv:"More accurate and interpretable output than stemming.",
+  lim:"Slower; needs POS information and language resources.",
+  app:"Chatbots, question answering, grammar tools." },
+{ group:"Text Preprocessing", owner:"c", name:"Noise Removal",
+  def:"Stripping non-textual or irrelevant elements from raw text.",
+  purpose:"Cleans data so only meaningful language content remains.",
+  how:"Uses regex or rules to remove HTML tags, URLs, special characters, emojis.",
+  ex:"\"&lt;p&gt;Great!! 😀 visit http://x.com&lt;/p&gt;\" → \"Great visit\"",
+  adv:"Improves data quality before feature extraction.",
+  lim:"Aggressive removal may strip useful signals, e.g. emojis in sentiment tasks.",
+  app:"Web-scraped data cleaning, social media analysis." },
+{ group:"Text Preprocessing", owner:"c", name:"Text Cleaning",
+  def:"The overall step of standardizing raw text — whitespace, encoding, typos.",
+  purpose:"Ensures consistent, error-free input across the whole pipeline.",
+  how:"Combines noise removal, normalization, and formatting fixes.",
+  ex:"\"  Hello    world!!\" → \"Hello world\"",
+  adv:"Reduces downstream errors and inconsistent tokens.",
+  lim:"Over-cleaning can erase stylistic or meaningful variation.",
+  app:"The first standardization step of any NLP pipeline." },
+
+{ group:"Feature Engineering", owner:"s", name:"Bag of Words",
+  def:"Represents text as an unordered count of word occurrences.",
+  purpose:"Converts text into fixed-size numeric vectors for ML models.",
+  how:"Builds a vocabulary, then counts word frequency per document.",
+  ex:"\"cat sat\" &amp; \"cat ran\" → vectors over {cat, sat, ran}",
+  adv:"Simple, fast, and easy to interpret.",
+  lim:"Ignores word order and context; high-dimensional and sparse.",
+  app:"Spam detection, basic text classification." },
+{ group:"Feature Engineering", owner:"s", name:"N-Grams",
+  def:"Contiguous sequences of N words or characters from text.",
+  purpose:"Captures local word order that Bag of Words misses.",
+  how:"Slides a window of size N across tokens (bigrams, trigrams...).",
+  ex:"\"I love NLP\" bigrams → [\"I love\", \"love NLP\"]",
+  adv:"Preserves some context and phrase structure.",
+  lim:"Vocabulary grows quickly, increasing sparsity as N rises.",
+  app:"Language modeling, autocomplete, plagiarism detection." },
+{ group:"Feature Engineering", owner:"s", name:"TF (Term Frequency)",
+  def:"Measures how often a term appears within a single document.",
+  purpose:"Highlights words that are important within that specific document.",
+  how:"TF = (count of term) / (total terms in the document).",
+  ex:"\"cat\" appears 3 times in a 100-word doc → TF = 0.03",
+  adv:"Easy to compute; reflects local importance.",
+  lim:"Common words can dominate even when not distinctive.",
+  app:"Basic document ranking and keyword scoring." },
+{ group:"Feature Engineering", owner:"s", name:"IDF (Inverse Document Frequency)",
+  def:"Measures how rare or common a term is across all documents in a corpus.",
+  purpose:"Downweights terms that appear in almost every document.",
+  how:"IDF = log(total documents / documents containing the term).",
+  ex:"\"the\" appears everywhere → low IDF; \"quantum\" is rare → high IDF.",
+  adv:"Helps separate informative words from generic ones.",
+  lim:"Needs the full document collection to compute meaningfully.",
+  app:"Search ranking, keyword extraction." },
+{ group:"Feature Engineering", owner:"s", name:"TF-IDF",
+  def:"Combines TF and IDF to score a word's importance to a document within a corpus.",
+  purpose:"Balances local frequency with corpus-wide rarity.",
+  how:"TF-IDF = TF × IDF, computed for every term-document pair.",
+  ex:"\"quantum\" scores high in a physics document within a general corpus.",
+  adv:"Better discriminative power than raw word counts.",
+  lim:"Still ignores word order and semantic meaning.",
+  app:"Search engines, document similarity, text classification." },
+
+{ group:"Language Representation", owner:"s", name:"One-Hot Encoding",
+  def:"Represents each word as a binary vector with a single '1' at its vocabulary index.",
+  purpose:"Gives words a basic numeric form for computation.",
+  how:"Vector length equals vocabulary size; one position is set to 1, the rest 0.",
+  ex:"vocab {cat, dog, rat}: \"dog\" → [0, 1, 0]",
+  adv:"Simple and unambiguous.",
+  lim:"No notion of similarity; vectors become huge for large vocabularies.",
+  app:"Small categorical NLP tasks, baseline models." },
+{ group:"Language Representation", owner:"s", name:"Word Embeddings",
+  def:"Dense, low-dimensional vectors that capture a word's meaning and relationships.",
+  purpose:"Lets a model measure semantic similarity between words.",
+  how:"Learned by training on large text so words in similar contexts get similar vectors.",
+  ex:"vector(\"king\") − vector(\"man\") + vector(\"woman\") ≈ vector(\"queen\")",
+  adv:"Captures meaning and analogy in a compact representation.",
+  lim:"A single fixed vector per word, regardless of context or sense.",
+  app:"Recommendation systems, semantic search, classification." },
+{ group:"Language Representation", owner:"s", name:"Word2Vec",
+  def:"A neural technique that learns word embeddings from context windows.",
+  purpose:"Efficiently produces embeddings from large unlabeled text corpora.",
+  how:"Uses CBOW (predict word from context) or Skip-gram (predict context from word).",
+  ex:"Trained on news articles, \"doctor\" ends up near \"nurse\" and \"hospital\".",
+  adv:"Fast to train; captures useful semantic structure.",
+  lim:"One vector per word; handles unseen or rare words poorly.",
+  app:"Search, recommendation systems, early chatbots." },
+{ group:"Language Representation", owner:"s", name:"FastText",
+  def:"An embedding method that represents words as bags of character n-grams.",
+  purpose:"Handles rare and out-of-vocabulary words better than Word2Vec.",
+  how:"Builds a word's vector from the sum of its sub-word n-gram vectors.",
+  ex:"\"unhappiness\" is built from pieces like \"un\", \"happi\", \"ness\".",
+  adv:"Works well for morphologically rich languages and typos.",
+  lim:"Larger model size and slightly higher training cost.",
+  app:"Multilingual NLP, spell-tolerant search." },
+{ group:"Language Representation", owner:"s", name:"Contextual Embeddings",
+  def:"Word representations that change depending on the surrounding sentence.",
+  purpose:"Solves the ambiguity problem of one fixed vector per word.",
+  how:"Deep models such as BERT generate a fresh vector per occurrence using attention.",
+  ex:"\"bank\" in \"river bank\" vs \"bank loan\" gets two different vectors.",
+  adv:"Captures polysemy and richer context; strong accuracy.",
+  lim:"Computationally heavy; needs large models and data.",
+  app:"Question answering, translation, chatbots." },
+
+{ group:"Language Models", owner:"c", name:"Statistical Language Models",
+  def:"Models that predict word probability using frequency counts from a corpus.",
+  purpose:"Estimate how likely a sequence of words is, e.g. for next-word prediction.",
+  how:"Uses n-gram counts and conditional probability P(word | previous n-1 words).",
+  ex:"After \"I want to\", \"eat\" is predicted more likely than \"purple\".",
+  adv:"Simple, interpretable, computationally light.",
+  lim:"Struggles with long-range context and unseen n-grams (data sparsity).",
+  app:"Early autocomplete, speech recognition." },
+{ group:"Language Models", owner:"c", name:"Neural Language Models",
+  def:"Models that use neural networks such as RNNs or LSTMs to predict word sequences.",
+  purpose:"Capture longer dependencies than n-gram statistical models.",
+  how:"Processes tokens sequentially, keeping a hidden state of prior context.",
+  ex:"An LSTM predicting the next word in a long paragraph.",
+  adv:"Handles longer context and generalizes better than n-grams.",
+  lim:"Sequential processing is slow to train; long-range memory still limited.",
+  app:"Text generation, early machine translation." },
+{ group:"Language Models", owner:"c", name:"Transformer-based Representations",
+  def:"Models that use self-attention to relate all words in a sequence in parallel.",
+  purpose:"Capture long-range dependencies efficiently and enable large-scale pretraining.",
+  how:"Attention layers weigh how relevant every other token is when encoding one token.",
+  ex:"BERT and GPT are both built on the transformer architecture.",
+  adv:"Highly parallelizable; state-of-the-art performance across NLP tasks.",
+  lim:"Requires large data and compute; can behave like a \"black box\".",
+  app:"Chatbots, translation, summarization, search." },
+];
+
+const cardMount = document.getElementById('cardMount');
+const groups = [...new Set(CONCEPTS.map(c=>c.group))];
+groups.forEach(g=>{
+  const items = CONCEPTS.filter(c=>c.group===g);
+  const wrap = document.createElement('div');
+  wrap.className = 'topic-group';
+  wrap.innerHTML = `<h3>${g} <span class="n">${items.length} concepts</span></h3>`;
+  const grid = document.createElement('div');
+  grid.className = 'card-grid';
+  items.forEach(c=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-top"><h4>${c.name}</h4><span class="who ${c.owner}">${c.owner==='c'?'C · 58':'S · 59'}</span></div>
+      <div class="def">${c.def}</div>
+      <div class="more">
+        <div class="row"><b>Purpose</b>${c.purpose}</div>
+        <div class="row"><b>How it works</b>${c.how}</div>
+        <div class="row ex">${c.ex}</div>
+        <div class="row"><b>Advantages</b>${c.adv}</div>
+        <div class="row"><b>Limitations</b>${c.lim}</div>
+        <div class="row"><b>Applications</b>${c.app}</div>
+      </div>
+      <div class="toggle-hint">tap to expand ▾</div>`;
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+    grid.appendChild(card);
+  });
+  wrap.appendChild(grid);
+  cardMount.appendChild(wrap);
+});
+
+/* ---------------- Comparative tables ---------------- */
+const COMPARES = [
+{ title:"Stemming vs Lemmatization", owner:"Authored by Chinmay Satam (58)",
+  rows:[
+    ["Working mechanism","Rule-based suffix stripping, no vocabulary lookup.","Dictionary + grammar based lookup of the root word."],
+    ["Computational complexity","Very low — simple string rules.","Higher — needs POS tagging and a lexicon like WordNet."],
+    ["Strengths","Fast, lightweight, works with no linguistic resources.","Linguistically accurate, always returns a real word."],
+    ["Weaknesses","Can produce non-words, e.g. \"studi\".","Slower and dependent on language resources."],
+    ["Suitable applications","Search engines, quick information retrieval.","Chatbots, grammar-sensitive tasks, question answering."],
+  ]},
+{ title:"TF vs TF-IDF", owner:"Authored by Suyog Satam (59)",
+  rows:[
+    ["Working mechanism","Counts raw frequency of a term in one document.","Multiplies term frequency by inverse document frequency."],
+    ["Computational complexity","Low — one pass over a single document.","Moderate — needs statistics across the whole corpus."],
+    ["Strengths","Simple, fast, easy to explain.","Down-weights generic words, highlights distinctive terms."],
+    ["Weaknesses","Common words can dominate the score unfairly.","Needs a representative corpus to compute IDF properly."],
+    ["Suitable applications","Quick keyword counts, small single-document tasks.","Search ranking, document similarity, text classification."],
+  ]},
+{ title:"Word2Vec vs FastText", owner:"Authored by Chinmay Satam (58)",
+  rows:[
+    ["Working mechanism","Learns one dense vector per whole word from context.","Learns vectors from character n-grams within each word."],
+    ["Computational complexity","Moderate; smaller model, faster training.","Slightly higher; more sub-word vectors to learn and store."],
+    ["Strengths","Fast, strong for common, well-represented words.","Handles rare words, typos, and morphology gracefully."],
+    ["Weaknesses","Cannot represent out-of-vocabulary words at all.","Larger model size and marginally slower to train."],
+    ["Suitable applications","English-heavy corpora with a fixed, common vocabulary.","Morphologically rich or multilingual text, noisy user input."],
+  ]},
+];
+const compareMount = document.getElementById('compareMount');
+COMPARES.forEach(c=>{
+  const el = document.createElement('div');
+  el.className = 'compare-wrap';
+  el.innerHTML = `<h3>${c.title}</h3><span class="owner">${c.owner}</span>
+  <table class="compare">
+    <thead><tr><th>Criterion</th><th>${c.title.split(' vs ')[0]}</th><th>${c.title.split(' vs ')[1]}</th></tr></thead>
+    <tbody>${c.rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody>
+  </table>`;
+  compareMount.appendChild(el);
+});
+
+/* ---------------- Workflow diagrams ---------------- */
+const FLOWS = [
+{ title:"Complete Text Preprocessing Pipeline", owner:"Authored by Chinmay Satam (58)",
+  steps:["Raw Text","Sentence Segmentation","Tokenization","Case Normalization","Stop-word Removal","Stemming / Lemmatization","Noise Removal","Clean Text"] },
+{ title:"Feature Engineering Pipeline", owner:"Authored by Suyog Satam (59)",
+  steps:["Clean Text","Build Vocabulary","N-Gram Extraction","Term Frequency (TF)","Inverse Doc. Frequency (IDF)","TF-IDF Weighting","Feature Vector"] },
+{ title:"Text-to-Vector Transformation Process", owner:"Authored by Suyog Satam (59), reviewed by Chinmay Satam (58)",
+  steps:["Clean Text","Choose Representation","Encode Tokens","Aggregate (sum / attention)","Dense Vector","Model Input"] },
+];
+const flowMount = document.getElementById('flowMount');
+FLOWS.forEach(f=>{
+  const el = document.createElement('div');
+  el.className = 'flow-card';
+  const boxes = f.steps.map((s,i)=>{
+    const cls = i===0 ? 'start' : (i===f.steps.length-1 ? 'end' : '');
+    const arrow = i < f.steps.length-1 ? '<span class="arrow">→</span>' : '';
+    return `<span class="fbox ${cls}">${s}</span>${arrow}`;
+  }).join('');
+  el.innerHTML = `<h3>${f.title}</h3><span class="owner">${f.owner}</span><div class="flow">${boxes}</div>`;
+  flowMount.appendChild(el);
+});
+
+/* ---------------- Applications ---------------- */
+const APPS = [
+{ name:"🔍 Search Engines", concepts:"Tokenization, TF-IDF, embeddings", why:"Needs to match a short query against millions of documents by meaning, not just exact words.", benefit:"Faster, more relevant results even when the query and document use different wording." },
+{ name:"💬 Chatbots", concepts:"Tokenization, lemmatization, contextual embeddings", why:"Must understand varied phrasing of the same intent and reply appropriately.", benefit:"Handles customer queries instantly, at any hour, without needing exact keyword matches." },
+{ name:"📊 Sentiment Analysis", concepts:"Stop-word removal, n-grams, word embeddings", why:"Needs to detect emotional tone from noisy, informal user text.", benefit:"Brands can track public opinion on products or events at scale, in real time." },
+{ name:"🌐 Machine Translation", concepts:"Tokenization, contextual embeddings, transformers", why:"Must preserve meaning and grammar across languages with different structures.", benefit:"Breaks language barriers for travel, business, and access to information." },
+{ name:"📝 Text Summarization", concepts:"Sentence segmentation, TF-IDF, transformers", why:"Needs to identify and compress the most important information in a document.", benefit:"Saves reading time by condensing long articles, reports, or meetings." },
+];
+const appMount = document.getElementById('appMount');
+APPS.forEach(a=>{
+  const el = document.createElement('div');
+  el.className = 'app-card';
+  el.innerHTML = `<h4>${a.name}</h4>
+    <div class="row"><b>Relevant concepts</b>${a.concepts}</div>
+    <div class="row"><b>Why they're needed</b>${a.why}</div>
+    <div class="row"><b>Expected benefit</b>${a.benefit}</div>`;
+  appMount.appendChild(el);
+});
+
+/* ---------------- Research & Industry ---------------- */
+const RESEARCH = [
+{ type:"research", kicker:"Research development", title:"Retrieval-Augmented Generation (RAG)", text:"Combines a language model with a document search step, so the model answers using embeddings retrieved from a knowledge base instead of relying only on memorized training data — directly building on the embedding concepts in this repository." },
+{ type:"research", kicker:"Research development", title:"Instruction-tuned Language Models", text:"Large transformer models are further trained on human feedback so their outputs follow instructions and stay helpful and safe, extending the transformer-based representations covered in Section A." },
+{ type:"industry", kicker:"Industrial application", title:"Google Search & Translate", text:"Uses transformer-based contextual embeddings to match search intent and translate between languages, moving far beyond simple keyword matching." },
+{ type:"industry", kicker:"Industrial application", title:"Banking & E-commerce Chatbots", text:"Companies like HDFC Bank and Amazon use NLP pipelines — tokenization, intent classification, embeddings — to automate customer support and order queries." },
+{ type:"tool", kicker:"Open-source framework", title:"spaCy", text:"An industrial-strength Python NLP library providing fast tokenization, lemmatization, POS tagging, and pretrained word/contextual embeddings out of the box — used directly while building the concept examples in this repository." },
+];
+const researchMount = document.getElementById('researchMount');
+RESEARCH.forEach(r=>{
+  const el = document.createElement('div');
+  el.className = 'r-card ' + (r.type==='industry' ? 'industry' : (r.type==='tool' ? 'tool' : ''));
+  el.innerHTML = `<span class="kicker">${r.kicker}</span><h4>${r.title}</h4><p>${r.text}</p>`;
+  researchMount.appendChild(el);
+});
+</script>
+</body>
+</html>
